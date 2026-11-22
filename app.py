@@ -47,9 +47,9 @@ PUBLIC_ENDPOINTS = {"login", "static", "healthz"}
 
 
 def init_auth():
-    """Create the admin table and seed the default account if none exists."""
+    """Create the admin table and seed the default account if it is missing."""
     db.ensure_admin_table()
-    if not db.list_admins():
+    if not db.get_admin_by_username(DEFAULT_ADMIN_USERNAME):
         db.create_admin(DEFAULT_ADMIN_USERNAME,
                         generate_password_hash(DEFAULT_ADMIN_PASSWORD),
                         "Administrator")

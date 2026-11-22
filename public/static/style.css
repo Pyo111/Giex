@@ -1150,19 +1150,6 @@ input[type="file"]::file-selector-button {
     margin-bottom: 18px;
 }
 
-.auth-foot {
-    margin: 24px 0 0;
-    padding-top: 18px;
-    border-top: 1px solid var(--line);
-    color: var(--muted);
-    font-size: 11.5px;
-    text-align: center;
-}
-
-.auth-foot-sep {
-    margin: 0 4px;
-}
-
 @media (max-width: 480px) {
     .auth-card {
         padding: 26px 22px 22px;
