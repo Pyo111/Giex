@@ -102,7 +102,25 @@ python init_cloud_db.py --seed
 > `--seed` clears existing worker/project/attendance data. Do not use it on a
 > database that already has real records.
 
-### 2.4 Confirm the connection
+### 2.4 Copy your existing XAMPP data (optional)
+
+If XAMPP already contains real records, copy them instead of loading sample
+data:
+
+```powershell
+python migrate_to_cloud.py --dry-run
+python migrate_to_cloud.py
+```
+
+The source defaults to `localhost:3306`, user `root`, empty password, and
+database `giex_builders` (override with `SOURCE_DB_*`). The script copies
+workers, projects, assignments, attendance and project files, preserves the
+original IDs, and fixes the `AUTO_INCREMENT` counters afterwards.
+
+Use `--replace` only when you intend to clear an already-populated target.
+Add `--with-admins` to copy existing admin accounts too.
+
+### 2.5 Confirm the connection
 
 ```powershell
 python -c "import database as db; print(db.server_flavor()); print(len(db.list_workers()), 'workers')"

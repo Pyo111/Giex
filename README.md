@@ -13,8 +13,9 @@ interface requires an administrator to sign in.
 - public/static/style.css - black & yellow web theme (served by Vercel's CDN)
 - seed_data.py     - sample workers, projects and one week of DTR (clears existing data)
 - init_cloud_db.py - creates the schema in a hosted MySQL/TiDB database and the first admin
+- migrate_to_cloud.py - copies existing XAMPP workers/projects/DTR into the hosted database
 - requirements.txt - Python packages (used by pip and Vercel)
-- vercel.json      - Vercel function settings
+- vercel.json      - Vercel project configuration
 - DEPLOYMENT.md    - step-by-step live deployment guide (Vercel + TiDB Cloud)
 
 ## Setup
@@ -105,8 +106,11 @@ Quick version:
 1. Create a TiDB Cloud Starter instance and copy its host, port, user, password.
 2. Copy `.env.example` to `.env` and fill in the `DB_*` values.
 3. `pip install -r requirements.txt`
-4. `python init_cloud_db.py` (add `--seed` for sample data)
-5. Run `vercel` / `vercel --prod` and add the same environment variables in the
+4. `python init_cloud_db.py` (creates the schema and admin)
+5. `python migrate_to_cloud.py` to copy your existing XAMPP data (use
+   `--dry-run` first; add `--seed` to `init_cloud_db.py` instead if you want
+   sample data)
+6. Run `vercel` / `vercel --prod` and add the same environment variables in the
    Vercel dashboard.
 
 Notes:
