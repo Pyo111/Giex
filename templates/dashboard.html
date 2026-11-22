@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Dashboard &middot; GIEX Builders DBMS{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+{% block subheading %}A live view of your workforce, projects and attendance records.{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-copy">
+        <span class="eyebrow">GIEX BUILDERS &middot; DATABASE MANAGEMENT SYSTEM</span>
+        <h2>Every worker, project and hour &mdash; in one place.</h2>
+        <p>Centralized construction records for workers, project files, assignments, DTR
+           attendance and payroll, all stored in the <strong>giex_builders</strong> MySQL database.</p>
+        <div class="hero-actions">
+            <a class="btn btn-primary" href="{{ url_for('attendance') }}">Record attendance</a>
+            <a class="btn btn-ghost" href="{{ url_for('projects') }}">View projects</a>
+        </div>
+    </div>
+    <div class="hero-mark">G</div>
+</section>
+
+<section class="stats">
+    {% for label, value, hint in stats %}
+        <article class="stat">
+            <span>{{ label }}</span>
+            <strong>{{ value }}</strong>
+            <small>{{ hint }}</small>
+        </article>
+    {% endfor %}
+</section>
+
+<div class="dashboard-grid">
+    <section class="panel">
+        <h2>Quick actions</h2>
+        <div class="quick-actions">
+            <a class="quick-action" href="{{ url_for('workers') }}"><span>01</span> Add or manage workers</a>
+            <a class="quick-action" href="{{ url_for('projects') }}"><span>02</span> Create a project</a>
+            <a class="quick-action" href="{{ url_for('assignments') }}"><span>03</span> Assign a worker</a>
+            <a class="quick-action" href="{{ url_for('attendance') }}"><span>04</span> Record time-in / time-out</a>
+            <a class="quick-action" href="{{ url_for('payroll') }}"><span>05</span> View payroll report</a>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Recent attendance</h2>
+        {% if recent %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Worker</th>
+                            <th>Project</th>
+                            <th>Time-in</th>
+                            <th>Time-out</th>
+                            <th>Status</th>
+                            <th class="text-right">Hours</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in recent %}
+                            <tr>
+                                <td>{{ r.attendance_date }}</td>
+                                <td>{{ r.worker_name }}</td>
+                                <td>{{ r.project_name }}</td>
+                                <td>{{ r.time_in or '—' }}</td>
+                                <td>{{ r.time_out or '—' }}</td>
+                                <td>
+                                    <span class="badge {{ r.attendance_status|lower|replace(' ', '-') }}">
+                                        {{ r.attendance_status }}
+                                    </span>
+                                </td>
+                                <td class="text-right">{{ r.total_hours }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="empty">No DTR records yet. Use <a href="{{ url_for('attendance') }}">DTR Attendance</a> to add one.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

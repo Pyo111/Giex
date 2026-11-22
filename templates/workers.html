@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Workers &middot; GIEX Builders DBMS{% endblock %}
+{% block heading %}Workers{% endblock %}
+{% block subheading %}Register workers, search records and keep daily rates up to date.{% endblock %}
+
+{% block content %}
+<div class="split">
+    <section class="panel" id="add">
+        <h2>Add worker</h2>
+        <form class="form-grid" method="post" action="{{ url_for('worker_add') }}">
+            <div>
+                <label for="first_name">First name</label>
+                <input id="first_name" name="first_name" placeholder="Juan" required>
+            </div>
+            <div>
+                <label for="last_name">Last name</label>
+                <input id="last_name" name="last_name" placeholder="Dela Cruz" required>
+            </div>
+            <div class="full">
+                <label for="role">Role</label>
+                <select id="role" name="role" required>
+                    <option value="" selected disabled>Select role</option>
+                    {% for role in worker_roles %}
+                        <option value="{{ role }}">{{ role }}</option>
+                    {% endfor %}
+                </select>
+                <small class="field-hint">Site engineers may be assigned to more than one project.</small>
+            </div>
+            <div class="full">
+                <label for="worker_rate">Daily rate (PHP)</label>
+                <input id="worker_rate" name="worker_rate" type="number" min="0" step="0.01"
+                       placeholder="700.00" required>
+            </div>
+            <div class="full">
+                <button class="btn btn-primary" type="submit">Save worker</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Worker records</h2>
+        <form class="toolbar" method="get" action="{{ url_for('workers') }}">
+            <div class="field grow">
+                <label for="q">Search</label>
+                <input id="q" name="q" value="{{ q }}" placeholder="Name or role">
+            </div>
+            <button class="btn btn-primary" type="submit">Search</button>
+            {% if q %}
+                <a class="btn btn-ghost" href="{{ url_for('workers') }}">Clear</a>
+            {% endif %}
+        </form>
+
+        {% if workers %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Role</th>
+                            <th class="text-right">Daily Rate</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for w in workers %}
+                            <tr>
+                                <td>{{ w.worker_id }}</td>
+                                <td>{{ w.first_name }}</td>
+                                <td>{{ w.last_name }}</td>
+                                <td>{{ w.role }}</td>
+                                <td class="text-right">PHP {{ '{:,.2f}'.format(w.worker_rate) }}</td>
+                                <td>
+                                    <div class="actions">
+                                        <a class="btn btn-ghost btn-sm"
+                                           href="{{ url_for('worker_edit', worker_id=w.worker_id) }}">Edit</a>
+                                        <form method="post"
+                                              action="{{ url_for('worker_delete', worker_id=w.worker_id) }}"
+                                              onsubmit="return confirm('Delete this worker and all related assignments and DTR records?');">
+                                            <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="empty">{{ 'No workers match your search.' if q else 'No workers yet. Add the first worker using the form.' }}</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

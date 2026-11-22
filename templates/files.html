@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Project Files &middot; GIEX Builders DBMS{% endblock %}
+{% block heading %}Project Files{% endblock %}
+{% block subheading %}{{ project.project_name }} &middot; {{ project.location }}{% endblock %}
+
+{% block content %}
+<div class="page-back"><a href="{{ url_for('projects') }}">&larr; Back to projects</a></div>
+
+<div class="split">
+    <section class="panel">
+        <h2>Upload file</h2>
+        <p class="panel-sub">Store plans, contracts, reports and photos for this project.
+           Files are kept inside the MySQL database.</p>
+        <form class="form-grid" method="post" enctype="multipart/form-data"
+              action="{{ url_for('project_file_upload', project_id=project.project_id) }}">
+            <div class="full">
+                <label for="file">File</label>
+                <input id="file" name="file" type="file" required>
+            </div>
+            <div class="full">
+                <label for="description">Description <span class="muted">(optional)</span></label>
+                <input id="description" name="description" placeholder="e.g. Ground floor plan (PDF)">
+            </div>
+            <div class="full">
+                <button class="btn btn-primary" type="submit">Upload file</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Stored files</h2>
+        {% if files %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>File Name</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Uploaded</th>
+                            <th class="text-right">Size</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for f in files %}
+                            <tr>
+                                <td>{{ f.file_id }}</td>
+                                <td>{{ f.file_name }}</td>
+                                <td>{{ f.file_type or '—' }}</td>
+                                <td>{{ f.description or '—' }}</td>
+                                <td>{{ f.uploaded_on }}</td>
+                                <td class="text-right">
+                                    {% if f.size_bytes < 1024 %}
+                                        {{ f.size_bytes }} B
+                                    {% elif f.size_bytes < 1048576 %}
+                                        {{ (f.size_bytes / 1024) | round(1) }} KB
+                                    {% else %}
+                                        {{ (f.size_bytes / 1048576) | round(1) }} MB
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <a class="btn btn-ghost btn-sm"
+                                           href="{{ url_for('project_file_download', file_id=f.file_id) }}">Download</a>
+                                        <form method="post"
+                                              action="{{ url_for('project_file_delete', file_id=f.file_id) }}"
+                                              onsubmit="return confirm('Delete this file?');">
+                                            <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="empty">No files stored for this project yet.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

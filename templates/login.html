@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#ffd400">
+    <title>Admin Sign In &middot; GIEX Builders DBMS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-page">
+<main class="auth-shell">
+    <section class="auth-card">
+        <div class="auth-brand">
+            <span class="brand-mark">G</span>
+            <span class="brand-text">
+                <strong>GIEX BUILDERS</strong>
+                <small>Database Management</small>
+            </span>
+        </div>
+
+        <h1>Admin sign in</h1>
+        <p class="auth-sub">Sign in with your administrator account to open the
+            GIEX Builders management system.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-stack">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form class="auth-form" method="post" action="{{ url_for('login') }}">
+            {% if next_url %}
+                <input type="hidden" name="next" value="{{ next_url }}">
+            {% endif %}
+            <div class="field">
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text"
+                       autocomplete="username" autofocus required
+                       placeholder="Enter your username">
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password"
+                       autocomplete="current-password" required
+                       placeholder="Enter your password">
+            </div>
+            <button class="btn btn-primary auth-submit" type="submit">Sign in</button>
+        </form>
+
+        <p class="auth-foot">
+            <span class="dot"></span> MySQL &middot; giex_builders
+            <span class="auth-foot-sep">&middot;</span>
+            Local server &middot; 127.0.0.1:5000
+        </p>
+    </section>
+</main>
+</body>
+</html>

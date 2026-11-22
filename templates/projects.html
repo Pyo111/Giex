@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Projects &middot; GIEX Builders DBMS{% endblock %}
+{% block heading %}Projects{% endblock %}
+{% block subheading %}Manage construction projects and their stored files.{% endblock %}
+
+{% block content %}
+<div class="split">
+    <section class="panel" id="add">
+        <h2>Add project</h2>
+        <form class="form-grid" method="post" action="{{ url_for('project_add') }}">
+            <div class="full">
+                <label for="project_name">Project name</label>
+                <input id="project_name" name="project_name"
+                       placeholder="2-Storey Residential Building" required>
+            </div>
+            <div class="full">
+                <label for="location">Location</label>
+                <input id="location" name="location" placeholder="Brgy. San Jose" required>
+            </div>
+            <div>
+                <label for="start_date">Start date</label>
+                <input id="start_date" name="start_date" type="date" value="{{ today_iso }}" required>
+            </div>
+            <div>
+                <label for="end_date">End date <span class="muted">(optional)</span></label>
+                <input id="end_date" name="end_date" type="date">
+            </div>
+            <div class="full">
+                <button class="btn btn-primary" type="submit">Save project</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Project records</h2>
+        {% if projects %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Project Name</th>
+                            <th>Location</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in projects %}
+                            <tr>
+                                <td>{{ p.project_id }}</td>
+                                <td>{{ p.project_name }}</td>
+                                <td>{{ p.location }}</td>
+                                <td>{{ p.start_date }}</td>
+                                <td>{{ p.end_date or 'Ongoing' }}</td>
+                                <td>
+                                    <div class="actions">
+                                        <a class="btn btn-ghost btn-sm"
+                                           href="{{ url_for('project_files', project_id=p.project_id) }}">Files</a>
+                                        <a class="btn btn-ghost btn-sm"
+                                           href="{{ url_for('project_edit', project_id=p.project_id) }}">Edit</a>
+                                        <form method="post"
+                                              action="{{ url_for('project_delete', project_id=p.project_id) }}"
+                                              onsubmit="return confirm('Delete this project and all its assignments, DTR records and files?');">
+                                            <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="empty">No projects yet. Create the first project using the form.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

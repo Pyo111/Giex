@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}DTR Attendance &middot; GIEX Builders DBMS{% endblock %}
+{% block heading %}DTR Attendance{% endblock %}
+{% block subheading %}Record time-in, time-out and attendance status, then review the daily time record.{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h2>Filter DTR</h2>
+    <form class="toolbar" method="get" action="{{ url_for('attendance') }}">
+        <div class="field">
+            <label for="filter_worker">Worker</label>
+            <select id="filter_worker" name="worker_id">
+                <option value="">All workers</option>
+                {% for w in workers %}
+                    <option value="{{ w.worker_id }}"
+                            {{ 'selected' if filters.worker_id == w.worker_id }}>
+                        {{ w.first_name }} {{ w.last_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label for="filter_project">Project</label>
+            <select id="filter_project" name="project_id">
+                <option value="">All projects</option>
+                {% for p in projects %}
+                    <option value="{{ p.project_id }}"
+                            {{ 'selected' if filters.project_id == p.project_id }}>
+                        {{ p.project_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label for="filter_from">From</label>
+            <input id="filter_from" name="date_from" type="date" value="{{ filters.date_from or '' }}">
+        </div>
+        <div class="field">
+            <label for="filter_to">To</label>
+            <input id="filter_to" name="date_to" type="date" value="{{ filters.date_to or '' }}">
+        </div>
+        <button class="btn btn-primary" type="submit">Apply</button>
+        <a class="btn btn-ghost" href="{{ url_for('attendance') }}">Reset</a>
+    </form>
+</section>
+
+<section class="panel">
+    <h2>Daily time record</h2>
+    {% if rows %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Worker</th>
+                        <th>Project</th>
+                        <th>Time-in</th>
+                        <th>Time-out</th>
+                        <th>Status</th>
+                        <th class="text-right">Total Hrs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in rows %}
+                        <tr>
+                            <td>{{ r.attendance_date }}</td>
+                            <td>{{ r.worker_name }}</td>
+                            <td>{{ r.project_name }}</td>
+                            <td>{{ r.time_in or '—' }}</td>
+                            <td>{{ r.time_out or '—' }}</td>
+                            <td>
+                                <span class="badge {{ r.attendance_status|lower|replace(' ', '-') }}">
+                                    {{ r.attendance_status }}
+                                </span>
+                            </td>
+                            <td class="text-right">{{ r.total_hours }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="empty">No DTR records match the selected filters.</p>
+    {% endif %}
+</section>
+
+<section class="action-grid">
+    <article class="panel">
+        <h2>Time-in</h2>
+        <form class="form-grid one-col" method="post" action="{{ url_for('attendance_time_in') }}">
+            <div>
+                <label for="in_assignment">Assignment</label>
+                <select id="in_assignment" name="assignment_id" required>
+                    <option value="" selected disabled>Select assignment</option>
+                    {% for a in assignments %}
+                        <option value="{{ a.assignment_id }}">
+                            #{{ a.assignment_id }} &mdash; {{ a.worker_name }} &middot; {{ a.project_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="in_date">Date</label>
+                <input id="in_date" name="attendance_date" type="date" value="{{ today }}" required>
+            </div>
+            <div>
+                <label for="in_time">Time-in</label>
+                <input id="in_time" name="time_in" type="time" value="08:00" required>
+            </div>
+            <div>
+                <button class="btn btn-primary" type="submit">Record time-in</button>
+            </div>
+        </form>
+    </article>
+
+    <article class="panel">
+        <h2>Time-out</h2>
+        <form class="form-grid one-col" method="post" action="{{ url_for('attendance_time_out') }}">
+            <div>
+                <label for="out_assignment">Assignment</label>
+                <select id="out_assignment" name="assignment_id" required>
+                    <option value="" selected disabled>Select assignment</option>
+                    {% for a in assignments %}
+                        <option value="{{ a.assignment_id }}">
+                            #{{ a.assignment_id }} &mdash; {{ a.worker_name }} &middot; {{ a.project_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="out_date">Date</label>
+                <input id="out_date" name="attendance_date" type="date" value="{{ today }}" required>
+            </div>
+            <div>
+                <label for="out_time">Time-out</label>
+                <input id="out_time" name="time_out" type="time" value="17:00" required>
+            </div>
+            <div>
+                <button class="btn btn-primary" type="submit">Record time-out</button>
+            </div>
+        </form>
+    </article>
+
+    <article class="panel">
+        <h2>Mark status</h2>
+        <form class="form-grid one-col" method="post" action="{{ url_for('attendance_status') }}">
+            <div>
+                <label for="status_assignment">Assignment</label>
+                <select id="status_assignment" name="assignment_id" required>
+                    <option value="" selected disabled>Select assignment</option>
+                    {% for a in assignments %}
+                        <option value="{{ a.assignment_id }}">
+                            #{{ a.assignment_id }} &mdash; {{ a.worker_name }} &middot; {{ a.project_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="status_date">Date</label>
+                <input id="status_date" name="attendance_date" type="date" value="{{ today }}" required>
+            </div>
+            <div>
+                <label for="status_value">Status</label>
+                <select id="status_value" name="status" required>
+                    <option value="" selected disabled>Select status</option>
+                    <option value="Absent">Absent</option>
+                    <option value="On Leave">On Leave</option>
+                    <option value="Half-day">Half-day</option>
+                </select>
+            </div>
+            <div>
+                <button class="btn btn-primary" type="submit">Save status</button>
+            </div>
+        </form>
+    </article>
+</section>
+{% endblock %}

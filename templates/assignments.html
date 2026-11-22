@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Assignments &middot; GIEX Builders DBMS{% endblock %}
+{% block heading %}Assignments{% endblock %}
+{% block subheading %}Link workers to projects. A worker can take a new project once the previous project has ended.{% endblock %}
+
+{% block content %}
+<div class="split">
+    <section class="panel" id="add">
+        <h2>Assign worker</h2>
+        <form class="form-grid one-col" method="post" action="{{ url_for('assignment_add') }}">
+            <div>
+                <label for="worker_id">Worker</label>
+                <select id="worker_id" name="worker_id" required>
+                    <option value="" selected disabled>Select worker</option>
+                    {% for w in workers %}
+                        {% set active = w.worker_id in active_ids %}
+                        {% set has_any = w.worker_id in assigned_ids %}
+                        {% set engineer = is_site_engineer(w.role) %}
+                        <option value="{{ w.worker_id }}" {{ 'disabled' if active and not engineer }}>
+                            #{{ w.worker_id }} &mdash; {{ w.first_name }} {{ w.last_name }} ({{ w.role }}){% if active %} &middot; {{ 'can take more projects' if engineer else 'ongoing project' }}{% elif has_any %} &middot; previous project finished{% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+                <small class="field-hint">Once a project's end date has passed, its worker can be
+                    assigned to a new project. Site engineers can hold several ongoing projects.</small>
+            </div>
+            <div>
+                <label for="project_id">Project</label>
+                <select id="project_id" name="project_id" required>
+                    <option value="" selected disabled>Select project</option>
+                    {% for p in projects %}
+                        <option value="{{ p.project_id }}">
+                            #{{ p.project_id }} &mdash; {{ p.project_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="assignment_date">Assignment date</label>
+                <input id="assignment_date" name="assignment_date" type="date"
+                       value="{{ today_iso }}" required>
+            </div>
+            <div>
+                <button class="btn btn-primary" type="submit">Create assignment</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Worker &ndash; project links</h2>
+        {% if assignments %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Assign ID</th>
+                            <th>Worker</th>
+                            <th>Role</th>
+                            <th>Project</th>
+                            <th>Project End</th>
+                            <th>Status</th>
+                            <th>Date Assigned</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in assignments %}
+                            <tr>
+                                <td>{{ a.assignment_id }}</td>
+                                <td>{{ a.worker_name }}</td>
+                                <td>{{ a.role }}</td>
+                                <td>{{ a.project_name }}</td>
+                                <td>{{ a.end_date or '—' }}</td>
+                                <td>
+                                    <span class="badge {{ 'ongoing' if a.project_status == 'Ongoing' else 'completed' }}">
+                                        {{ a.project_status }}
+                                    </span>
+                                </td>
+                                <td>{{ a.assignment_date }}</td>
+                                <td>
+                                    <form method="post"
+                                          action="{{ url_for('assignment_delete', assignment_id=a.assignment_id) }}"
+                                          onsubmit="return confirm('Remove this assignment and its DTR records?');">
+                                        <button class="btn btn-danger btn-sm" type="submit">Remove</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="empty">No assignments yet. Assign a worker to a project using the form.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

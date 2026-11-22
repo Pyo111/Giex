@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Payroll Report &middot; GIEX Builders DBMS{% endblock %}
+{% block heading %}Payroll Report{% endblock %}
+{% block subheading %}Gross pay per worker for a date range &mdash; paid hours capped at 8 per day.{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h2>Payroll period</h2>
+    <form class="toolbar" method="get" action="{{ url_for('payroll') }}">
+        <div class="field">
+            <label for="date_from">From</label>
+            <input id="date_from" name="date_from" type="date" value="{{ date_from }}" required>
+        </div>
+        <div class="field">
+            <label for="date_to">To</label>
+            <input id="date_to" name="date_to" type="date" value="{{ date_to }}" required>
+        </div>
+        <div class="field">
+            <label for="project_id">Project</label>
+            <select id="project_id" name="project_id">
+                <option value="">All projects</option>
+                {% for p in projects %}
+                    <option value="{{ p.project_id }}"
+                            {{ 'selected' if project_id == p.project_id }}>
+                        {{ p.project_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Generate report</button>
+    </form>
+</section>
+
+{% if rows %}
+    <section class="stats stats-3">
+        <article class="stat">
+            <span>Workers paid</span>
+            <strong>{{ rows|length }}</strong>
+            <small>With attendance in this period</small>
+        </article>
+        <article class="stat">
+            <span>Total paid hours</span>
+            <strong>{{ '{:,.2f}'.format(totals.hours) }}</strong>
+            <small>Overtime capped at 8 hrs/day</small>
+        </article>
+        <article class="stat">
+            <span>Total gross pay</span>
+            <strong class="highlight">PHP {{ '{:,.2f}'.format(totals.pay) }}</strong>
+            <small>Daily rate &divide; 8 &times; paid hours</small>
+        </article>
+    </section>
+
+    <section class="panel">
+        <h2>Payroll details</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Worker</th>
+                        <th>Role</th>
+                        <th class="text-right">Daily Rate</th>
+                        <th class="text-right">Days</th>
+                        <th class="text-right">Absent</th>
+                        <th class="text-right">Actual Hrs</th>
+                        <th class="text-right">Paid Hrs</th>
+                        <th class="text-right">Gross Pay</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in rows %}
+                        <tr>
+                            <td>{{ r.worker_id }}</td>
+                            <td>{{ r.worker_name }}</td>
+                            <td>{{ r.role }}</td>
+                            <td class="text-right">PHP {{ '{:,.2f}'.format(r.worker_rate) }}</td>
+                            <td class="text-right">{{ r.days_worked }}</td>
+                            <td class="text-right">{{ r.days_absent }}</td>
+                            <td class="text-right">{{ r.total_hours }}</td>
+                            <td class="text-right">{{ r.paid_hours }}</td>
+                            <td class="text-right"><strong>PHP {{ '{:,.2f}'.format(r.gross_pay) }}</strong></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% else %}
+    <section class="panel">
+        <p class="empty">No attendance records found for this period and project.</p>
+    </section>
+{% endif %}
+{% endblock %}

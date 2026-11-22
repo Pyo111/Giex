@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#ffd400">
+    <title>{% block title %}GIEX Builders DBMS{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <a class="brand" href="{{ url_for('dashboard') }}">
+            <span class="brand-mark">G</span>
+            <span class="brand-text">
+                <strong>GIEX BUILDERS</strong>
+                <small>Database Management</small>
+            </span>
+        </a>
+
+        <nav class="nav">
+            <a class="nav-link {{ 'active' if active == 'dashboard' }}" href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a class="nav-link {{ 'active' if active == 'workers' }}" href="{{ url_for('workers') }}">Workers</a>
+            <a class="nav-link {{ 'active' if active == 'projects' }}" href="{{ url_for('projects') }}">Projects</a>
+            <a class="nav-link {{ 'active' if active == 'assignments' }}" href="{{ url_for('assignments') }}">Assignments</a>
+            <a class="nav-link {{ 'active' if active == 'attendance' }}" href="{{ url_for('attendance') }}">DTR Attendance</a>
+            <a class="nav-link {{ 'active' if active == 'payroll' }}" href="{{ url_for('payroll') }}">Payroll Report</a>
+            <a class="nav-link {{ 'active' if active == 'settings' }}" href="{{ url_for('settings') }}">Settings</a>
+        </nav>
+
+        <div class="sidebar-account">
+            <form method="post" action="{{ url_for('logout') }}">
+                <button class="btn btn-ghost btn-sm sidebar-logout" type="submit">Sign out</button>
+            </form>
+        </div>
+
+        <div class="sidebar-foot">
+            <span><span class="dot"></span>MySQL &middot; {{ db_name }}</span>
+            <span>{{ server_label }}</span>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <h1>{% block heading %}{% endblock %}</h1>
+                <p>{% block subheading %}{% endblock %}</p>
+            </div>
+            <div class="topbar-side">
+                <span class="date-chip">{{ today_label }}</span>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-stack">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}Settings &middot; GIEX Builders DBMS{% endblock %}
+{% block heading %}Settings{% endblock %}
+{% block subheading %}Manage administrator access and your sign-in password.{% endblock %}
+
+{% block content %}
+<nav class="settings-tabs" aria-label="Settings sections">
+    <a class="settings-tab {{ 'active' if tab == 'admins' }}"
+       href="{{ url_for('settings_admins') }}">Administrators</a>
+    <a class="settings-tab {{ 'active' if tab == 'password' }}"
+       href="{{ url_for('settings_password') }}">Password</a>
+</nav>
+
+{% if tab == 'admins' %}
+    <div class="settings-stack">
+        <section class="settings-card">
+            <header class="settings-card-head">
+                <div>
+                    <h2>Add administrator</h2>
+                    <p>The new account can sign in immediately after it is created.</p>
+                </div>
+                <span class="settings-chip">New account</span>
+            </header>
+            <div class="settings-card-body">
+                <form class="form-grid" method="post" action="{{ url_for('settings_admins') }}">
+                    <div>
+                        <label for="full_name">Full name (optional)</label>
+                        <input id="full_name" name="full_name" maxlength="100"
+                               placeholder="e.g. Maria Santos">
+                    </div>
+                    <div>
+                        <label for="username">Username</label>
+                        <input id="username" name="username" required minlength="3" maxlength="50"
+                               pattern="[A-Za-z0-9._-]+" autocomplete="off"
+                               placeholder="e.g. site.admin">
+                        <small class="field-hint">3&ndash;50 characters: letters, numbers, dots,
+                            dashes or underscores.</small>
+                    </div>
+                    <div>
+                        <label for="password">Password</label>
+                        <input id="password" name="password" type="password" required
+                               minlength="8" autocomplete="new-password">
+                    </div>
+                    <div>
+                        <label for="confirm_password">Confirm password</label>
+                        <input id="confirm_password" name="confirm_password" type="password" required
+                               minlength="8" autocomplete="new-password">
+                    </div>
+                    <div class="full form-actions">
+                        <button class="btn btn-primary" type="submit">Create admin account</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="settings-card">
+            <header class="settings-card-head">
+                <div>
+                    <h2>Administrator accounts</h2>
+                    <p>Every account listed here has full access to the system.</p>
+                </div>
+                <span class="settings-chip">{{ admins|length }} account{{ '' if admins|length == 1 else 's' }}</span>
+            </header>
+            <div class="settings-card-body {{ 'flush' if admins }}">
+                {% if admins %}
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Full name</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for a in admins %}
+                                    <tr>
+                                        <td>{{ a.admin_id }}</td>
+                                        <td>
+                                            {{ a.username }}
+                                            {% if a.admin_id == session.get('admin_id') %}
+                                                <span class="badge present">You</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ a.full_name or '—' }}</td>
+                                        <td>{{ a.created_at }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="empty">No administrator accounts found.</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+{% else %}
+    <div class="settings-grid">
+        <section class="settings-card">
+            <header class="settings-card-head">
+                <div>
+                    <h2>Change password</h2>
+                    <p>Use at least 8 characters and avoid reusing your old password.</p>
+                </div>
+            </header>
+            <div class="settings-card-body">
+                <form class="form-grid one-col" method="post" action="{{ url_for('settings_password') }}">
+                    <div>
+                        <label for="current_password">Current password</label>
+                        <input id="current_password" name="current_password" type="password"
+                               autocomplete="current-password" required>
+                    </div>
+                    <div>
+                        <label for="new_password">New password</label>
+                        <input id="new_password" name="new_password" type="password"
+                               autocomplete="new-password" minlength="8" required>
+                    </div>
+                    <div>
+                        <label for="confirm_password_new">Confirm new password</label>
+                        <input id="confirm_password_new" name="confirm_password" type="password"
+                               autocomplete="new-password" minlength="8" required>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" type="submit">Update password</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="settings-card">
+            <header class="settings-card-head">
+                <div>
+                    <h2>Account details</h2>
+                    <p>Information about the administrator account you are using.</p>
+                </div>
+            </header>
+            <div class="settings-card-body">
+                <dl class="detail-list">
+                    <div class="detail-row">
+                        <dt>Username</dt>
+                        <dd>{{ admin.username }}</dd>
+                    </div>
+                    <div class="detail-row">
+                        <dt>Full name</dt>
+                        <dd>{{ admin.full_name or '—' }}</dd>
+                    </div>
+                    <div class="detail-row">
+                        <dt>Access level</dt>
+                        <dd><span class="badge present">Administrator</span></dd>
+                    </div>
+                    <div class="detail-row">
+                        <dt>Account created</dt>
+                        <dd>{{ admin.created_at }}</dd>
+                    </div>
+                </dl>
+                <div class="settings-note">
+                    <strong>Password reminder</strong>
+                    <ul>
+                        <li>Use at least 8 characters.</li>
+                        <li>Do not share your password with other admins.</li>
+                        <li>Change it again if you think it has been exposed.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endif %}
+{% endblock %}
