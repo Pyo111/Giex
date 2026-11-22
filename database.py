@@ -58,11 +58,20 @@ DB_NAME = os.environ.get("DB_NAME", "giex_builders")
 DB_TIME_ZONE = os.environ.get("DB_TIME_ZONE", "+08:00").strip()
 
 
+def _certifi_ca():
+    """Path to certifi's CA bundle, when the package is installed."""
+    try:
+        import certifi
+    except ImportError:
+        return ""
+    return certifi.where()
+
+
 def _ssl_config():
     """Build TLS settings. Hosted MySQL/TiDB requires TLS; localhost does not."""
+    local = DB_HOST.lower() in ("localhost", "127.0.0.1", "::1")
     mode = os.environ.get("DB_SSL_MODE", "").strip().upper()
     if not mode:
-        local = DB_HOST.lower() in ("localhost", "127.0.0.1", "::1")
         mode = "DISABLED" if local else "REQUIRED"
 
     if mode == "DISABLED":
@@ -77,6 +86,11 @@ def _ssl_config():
         ca_path = os.path.join(tempfile.gettempdir(), "giex-db-ca.pem")
         with open(ca_path, "w", encoding="utf-8") as handle:
             handle.write(ca_pem)
+
+    # Vercel's runtime has no OpenSSL default CA path. Use certifi's bundle so
+    # certificate verification works there (and on any minimal Linux image).
+    if not ca_path and not local:
+        ca_path = _certifi_ca()
 
     if ca_path:
         config["ssl_ca"] = ca_path
